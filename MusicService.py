@@ -1,11 +1,14 @@
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+from dotenv import load_dotenv
 import pygame
 from LyricsService import LyricsService
-import json
+import keyboard
 
 from DownloadService import DownloadService
 
+load_dotenv()
+MUSIC_PATH = os.getenv('MUSIC_PATH', 'music/')
 
 class MusicService:
 
@@ -35,14 +38,14 @@ class MusicService:
     def deleteSong(self, songIndex):
         try:
             arr = self.getAllSongs()
-            os.remove(rf"C:\Users\berna\PycharmProjects\mp3playercli\music\{arr[songIndex - 1]}")
+            os.remove(rf"{MUSIC_PATH}\{arr[songIndex - 1]}")
             print(f"You have successfully deleted the song {arr[songIndex]}")
             self.listAllSongs()
         except Exception as e:
             print(e)
 
     def getAllSongs(self):
-        arr = os.listdir(r"C:\Users\berna\PycharmProjects\mp3playercli\music")
+        arr = os.listdir(MUSIC_PATH)
         return arr
 
     def getTitle(self, index):
@@ -50,14 +53,15 @@ class MusicService:
         return arr[index]
 
     def playSongWithLyrics(self, index):
+
         lyricService = LyricsService()
         songs = self.getAllSongs()
 
         pygame.mixer.init()
 
-        music_file = rf"C:\Users\berna\PycharmProjects\mp3playercli\music\{songs[index - 1]}"
+        music_file = rf"{MUSIC_PATH}\{songs[index - 1]}"
         pygame.mixer.music.load(music_file)
-        pygame.mixer.music.play(-1)
+        pygame.mixer.music.play(1, 0, 12000)
 
         print(f"Now playing: {self.getTitle(index - 1)} 🔊\n")
 
@@ -67,6 +71,25 @@ class MusicService:
         print(lyrics)
 
         while pygame.mixer.music.get_busy():
+            # if keyboard.is_pressed('s') :
+            #     print("The song is stopped.\n")
+            #     pygame.mixer.music.stop()
+            # elif keyboard.is_pressed('c') :
+            #     print("The song is stopped.\n")
+            #     pygame.mixer.music.stop()
+            #     self.listAllSongs()
+            # elif keyboard.is_pressed('p') :
+            #     print("The song is paused.\n")
+            #     pygame.mixer.music.pause()
+            # elif keyboard.is_pressed('u') :
+            #     print("The song is unpaused.\n")
+            #     pygame.mixer.music.unpause()
+
             pygame.time.Clock().tick(10)
 
 
+    def isIndexValid(self, index):
+        if index <= 0 or index >= len(self.getAllSongs()) or not index.isnumeric() :
+            return False
+
+        return True
