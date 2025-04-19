@@ -1,16 +1,18 @@
 import os
+import keyboard
+
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from dotenv import load_dotenv
 import pygame
 from LyricsService import LyricsService
-import keyboard
-
 from DownloadService import DownloadService
 
 load_dotenv()
 MUSIC_PATH = os.getenv('MUSIC_PATH', 'music/')
 
+
 class MusicService:
+
 
     def __init__(self):
         pass
@@ -19,17 +21,20 @@ class MusicService:
         arr = self.getAllSongs()
         index = 1
 
-        print("\n🎶 Your songs in the playlist:")
+        if len(arr) > 0:
+            print("\n🎶 Your songs in the playlist:")
 
-        for index, song in enumerate(arr, start=1):
-            print(f"{index}. {song}")
-            # index += 1
+            for index, song in enumerate(arr, start=1):
+                print(f"{index}. {song}")
+                # index += 1
+        else :
+            print("There are no songs in the list, please add a song.")
 
     def addSong(self, songUrl):
         try:
             downloadService = DownloadService()
             if downloadService.download_audio_as_mp3(songUrl):
-                print("Song Added\nYour songs in the playlist are: ")
+                print("Song Added!\nYour songs in the playlist are: ")
                 self.listAllSongs()
 
         except Exception as e:
@@ -70,26 +75,18 @@ class MusicService:
 
         print(lyrics)
 
+        print(f"\n ℹ️ Here are the keyboard listeners:\n\tS = STOP\n\tP = PAUSE")
+
         while pygame.mixer.music.get_busy():
-            # if keyboard.is_pressed('s') :
-            #     print("The song is stopped.\n")
-            #     pygame.mixer.music.stop()
-            # elif keyboard.is_pressed('c') :
-            #     print("The song is stopped.\n")
-            #     pygame.mixer.music.stop()
-            #     self.listAllSongs()
-            # elif keyboard.is_pressed('p') :
-            #     print("The song is paused.\n")
-            #     pygame.mixer.music.pause()
-            # elif keyboard.is_pressed('u') :
-            #     print("The song is unpaused.\n")
-            #     pygame.mixer.music.unpause()
+            keyboardListener.listen()
 
             pygame.time.Clock().tick(10)
 
-
     def isIndexValid(self, index):
-        if index <= 0 or index >= len(self.getAllSongs()) or not index.isnumeric() :
+        if index <= 0 or index >= len(self.getAllSongs()) or not index.isnumeric():
             return False
 
         return True
+
+from KeyboardListenerService import KeyboardListenerService
+keyboardListener = KeyboardListenerService()
