@@ -1,7 +1,8 @@
 from MusicService import MusicService
 import pygame
 import keyboard
-
+import sys
+from MusixInterface import MusixInterface
 
 musicService = MusicService()
 
@@ -10,16 +11,10 @@ musicService = MusicService()
 # musicService.addSong(songUrl)
 #
 
-songIndex = int(input("\nEnter Song Index to play: "))
-
-musicService.playSongWithLyrics(songIndex)
-if keyboard.is_pressed('q'):
-    pygame.mixer.quit()
-
-
-
-
-
-
-
-
+try:
+    cli = MusixInterface()
+    cli.run()
+except Exception as e:
+    print(f"❌ Critical error: {e}")
+    print("The application will now exit.")
+    sys.exit(1)

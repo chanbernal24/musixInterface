@@ -1,5 +1,5 @@
 import os
-import keyboard
+import time
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from dotenv import load_dotenv
@@ -12,7 +12,6 @@ MUSIC_PATH = os.getenv('MUSIC_PATH', 'music/')
 
 
 class MusicService:
-
 
     def __init__(self):
         pass
@@ -27,7 +26,7 @@ class MusicService:
             for index, song in enumerate(arr, start=1):
                 print(f"{index}. {song}")
                 # index += 1
-        else :
+        else:
             print("There are no songs in the list, please add a song.")
 
     def addSong(self, songUrl):
@@ -44,7 +43,7 @@ class MusicService:
         try:
             arr = self.getAllSongs()
             os.remove(rf"{MUSIC_PATH}\{arr[songIndex - 1]}")
-            print(f"You have successfully deleted the song {arr[songIndex]}")
+            # print(f"You have successfully deleted the song {arr[songIndex]}")
             self.listAllSongs()
         except Exception as e:
             print(e)
@@ -58,29 +57,45 @@ class MusicService:
         return arr[index]
 
     def playSongWithLyrics(self, index):
+        try:
+            songs = self.getAllSongs()
 
-        lyricService = LyricsService()
-        songs = self.getAllSongs()
+            if index < 1 or index > len(songs):
+                print(f"⚠️ Invalid song index. Please choose a number between 1 and {len(songs)}")
+                return
 
-        pygame.mixer.init()
+            pygame.mixer.init()
 
-        music_file = rf"{MUSIC_PATH}\{songs[index - 1]}"
-        pygame.mixer.music.load(music_file)
-        pygame.mixer.music.play(1, 0, 12000)
+            song_name = songs[index - 1]
+            music_file = f"{MUSIC_PATH}/{song_name}"
 
-        print(f"Now playing: {self.getTitle(index - 1)} 🔊\n")
+            try:
+                pygame.mixer.music.load(music_file)
+                pygame.mixer.music.play()
 
-        track_response = lyricService.searchTrack(songs[index - 1], 1)
-        lyrics = lyricService.getLyrics(track_response)
+                print(f"Now playing: {song_name} 🔊\n")
 
-        print(lyrics)
+                keyboard_listener = KeyboardListenerService()
 
-        print(f"\n ℹ️ Here are the keyboard listeners:\n\tS = STOP\n\tP = PAUSE")
+                try:
+                    lyricService = LyricsService()
+                    track_response = lyricService.searchTrack(song_name, 1)
+                    lyrics = lyricService.getLyrics(track_response)
+                    print(lyrics)
+                except Exception as e:
+                    print("⚠️ Could not load lyrics for this song")
 
-        while pygame.mixer.music.get_busy():
-            keyboardListener.listen()
+                print(f"\n ℹ️ Press 'S' to STOP the song")
 
-            pygame.time.Clock().tick(10)
+                while pygame.mixer.music.get_busy():
+                    keyboard_listener.listen()
+                    pygame.time.Clock().tick(10)
+
+            except pygame.error as e:
+                print(f"❌ Error playing the song: {e}")
+
+        except Exception as e:
+            print(f"❌ Error: {e}")
 
     def isIndexValid(self, index):
         if index <= 0 or index >= len(self.getAllSongs()) or not index.isnumeric():
@@ -88,5 +103,7 @@ class MusicService:
 
         return True
 
+
 from KeyboardListenerService import KeyboardListenerService
+
 keyboardListener = KeyboardListenerService()
